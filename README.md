@@ -20,15 +20,16 @@ Traditional calendar apps rely heavily on mouse interactions, which are ineffici
 - Soft (Informative): Allows overlaps but triggers visual warnings and color-coded alerts.
 - Flexible (Fluid): A placeholder slice that can be automatically truncated or shifted by higher-priority tasks.
 
-**4. Tag-Based Indexing (```-t``` flag):**
-- Instantaneously filter through time slices by category defined by users (e.g., they can define some tags such as ```#sports```, ```#work``` by some special commands).
+**4. Tag-Based Indexing (```-t``` flag):** Instantaneously filter through time slices by category defined by users (e.g., they can define some tags such as ```#sports```, ```#work``` by some special commands).
 
 **5. Smart Gap Discovery:** Command-based search (e.g., ```find 2h```) that calculates the union of occupied slits to identify available time windows.
 
 ### Core Tech Stack
 <!-- 使用的語言、框架、工具等 -->
 **Language:** C++20.
+
 **UI Framework:** Qt 6 / QML.
+
 **Data Persistence:** JSON-based local storage.
 
 ### Development timeline
@@ -43,7 +44,9 @@ Traditional calendar apps rely heavily on mouse interactions, which are ineffici
 ### Link to DSAP
 <!-- 你的專題可能涉及哪些資料結構或演算法概念？為什麼？ -->
 **Interval Tree:** Manages time segments to enable Overlap Queries and Point-in-Interval Queries in $O(\log N + K)$ time, ensuring instant UI feedback.
+
 **Command Lexical Analysis (FSM):** Processes input streams through a Finite State Machine for robust flag parsing and syntax validation.
+
 **Greedy Interval Merging:** Implements a greedy approach to merge occupied intervals and compute the complement set for gap searching.
 
 ---
