@@ -49,6 +49,9 @@ Traditional calendar apps rely heavily on mouse interactions, which are ineffici
 
 **Greedy Interval Merging:** Implements a greedy approach to merge occupied intervals and compute the complement set for gap searching.
 
+### Competitve analysis for Chronoslit
+> See [Competitive Analysis](docs/competitive_analysis.md) for a comparison with existing CLI-based tools.
+
 ---
 
 ## Prototype Report
