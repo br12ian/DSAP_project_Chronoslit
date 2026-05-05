@@ -32,41 +32,30 @@ Traditional calendar apps rely heavily on mouse interactions, which are ineffici
 
 **Data Persistence:** JSON-based local storage.
 
-### Development timeline
-<!-- 各週預計完成的進度 -->
-| Week | Schedule |
-| :--- | :--- |
-| **Week 8-9** | Qt/QML environment setup & core interval tree implementation. |
-| **Week 10-11** | Command parser (FSM) & JSON persistence layer. |
-| **Week 12-13** | 7-Column vertical UI development & coordinate mapping logic. |
-| **Week 14-15** | Conflict visualization, performance tuning, and final debugging. |
-
-### Link to DSAP
-<!-- 你的專題可能涉及哪些資料結構或演算法概念？為什麼？ -->
-**Interval Tree:** Manages time segments to enable Overlap Queries and Point-in-Interval Queries in $O(\log N + K)$ time, ensuring instant UI feedback.
-
-**Command Lexical Analysis (FSM):** Processes input streams through a Finite State Machine for robust flag parsing and syntax validation.
-
-**Greedy Interval Merging:** Implements a greedy approach to merge occupied intervals and compute the complement set for gap searching.
 
 ### Competitve analysis for Chronoslit
 > See [Competitive Analysis](docs/competitive_analysis.md) for a comparison with existing CLI-based tools.
 
+### Prototype Expected Verification Content
+
+Focus on three basic things: 
+1. Regex parsing from CLI inputs
+
+2. Overlap algorithm with interval tree
+
+3. Basic UI Integration to ensure the C++ backend correctly triggers dynamic rendering on the QML frontend.
 ---
 
 ## Prototype Report
 
-### 目前進度
+### Current progress
 <!-- 完成了什麼 -->
 
-### 遇到的困難
+### Faced challenges
 <!-- 遇到什麼問題、如何解決或打算如何解決 -->
 
-### 下一步計畫
+### Next steps
 <!-- 接下來要做什麼 -->
-
-### 與課程的關聯
-<!-- 到目前為止，你的實作中哪些部分與課程內容有關？關係是什麼？ -->
 
 ---
 
@@ -78,5 +67,3 @@ Traditional calendar apps rely heavily on mouse interactions, which are ineffici
 ### 使用方式
 <!-- 如何編譯、執行、使用你的程式 -->
 
-### 與課程的關聯總結
-<!-- 總結你的專題與進階程式設計及資料結構課程之間的關聯 -->
