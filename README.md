@@ -50,13 +50,29 @@ Focus on three basic things:
 
 ### Current progress
 <!-- 完成了什麼 -->
+- **Core data structure:** Interval tree implementation. It can handle event insertion and time overlapping problem.
+
+- **CLI parsing engine:** Developed a robust Regex-based parser within the ``SchedulerController`` so that the command can be executed.
+
+- **Basic system integration:** Connected the backend C++ logic and QML frontend.
+
 
 ### Faced challenges
 <!-- 遇到什麼問題、如何解決或打算如何解決 -->
+- **Calender data scope:** I didn't properly thought of how to implement a good calender in my proposal, so I find it difficult to present a good interface. In my prototype, I implemented a strict date-filtering logic so the system only renders current-week data, preventing visual bugs. I plan to make a dynamic date calender, and also make a monthly calender for users to quickly see what their plans are throughout the month.
+
+- **User experience:** I find that the CLI-driven approach isn't that powerful, since the stricted formatting string for every entry may hinder user experience. I plan to implement shorthand input support (e.g., "today", "tmr", "2pm") and command history / autocompletion to minimize repetitive typing and lower the entry barrier for new users.
+
 
 ### Next steps
 <!-- 接下來要做什麼 -->
+- **Calender design:** Make a better calender design so that user can see their schedules by the 7-columns bar and the monthly calender.
 
+- **Intelligent shorthand engine:** Develop a better engine to make imputs more flexible to enhance user experience.
+
+- **Data persistence:** Implement JSON-based serialization to allow user data to be saved and reloaded across different sessions.
+
+- **Performance benchmarking:** Conduct a formal comparison between the interval tree and a standard linear array search to document the scalability of the Chronoslit kernel for the final demo.
 ---
 
 ## Final Report
