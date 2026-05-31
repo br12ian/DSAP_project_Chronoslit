@@ -209,7 +209,9 @@ Window {
             Qt.callLater(root.isMonthView ? root.computeMonthLayout : root.computeWeekLayout)
 
             if (root.expectJump && root.jumpToY >= 0) {
-                autoScrollAnim.to = Math.max(0, root.jumpToY - 100)
+                var targetY = root.jumpToY - 100 
+                var maxLegalY = mainScrollArea.contentHeight - mainScrollArea.height
+                autoScrollAnim.to = Math.max(0, Math.min(targetY, maxLegalY))
                 autoScrollAnim.start()
                 root.expectJump = false
             }
@@ -224,6 +226,16 @@ Window {
             }
             tagModel.append({ "name": name, "colorCode": colorCode })
             root.colorUpdateTrigger++
+        }
+
+        function onTagRemoved(name) {
+            for (var i = 0; i < tagModel.count; i++) {
+                if (tagModel.get(i).name === name) {
+                    tagModel.remove(i)
+                    root.colorUpdateTrigger++ // 觸發畫布刷新，讓該標籤的行程變回預設安全灰色
+                    break
+                }
+            }
         }
     }
 

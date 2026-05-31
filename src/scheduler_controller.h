@@ -27,6 +27,7 @@ signals:
     void calendarCleared();
     void viewChanged(QStringList dayLabels, QStringList dateLabels, QVariantList isCurrentMonth, QVariantList isToday, QString rangeLabel);
     void tagAdded(const QString& name, const QString& colorCode);
+    void tagRemoved(const QString& name);
 
 private:
     IntervalTree tree;
@@ -313,6 +314,17 @@ public:
                 
                 emit tagAdded(tagName, tagColor);
                 std::cout << "[Tag] Command created new tag: #" << tagName.toStdString() << " with color " << tagColor.toStdString() << "\n";
+                return;
+            }
+
+            // 💡 8. 匹配 "/rmtag #TagName" (透過指令刪除標籤)
+            // 範例：/rmtag #Basketball
+            std::regex rmTagCmdPattern(R"(^/rmtag\s+#(\w+))");
+            if (std::regex_search(sRaw, rmMatch, rmTagCmdPattern)) {
+                QString tagName = QString::fromStdString(rmMatch[1].str()).trimmed();
+                
+                emit tagRemoved(tagName);
+                std::cout << "[Tag] Command removed tag: #" << tagName.toStdString() << "\n";
                 return;
             }
         }
