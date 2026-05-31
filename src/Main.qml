@@ -199,6 +199,12 @@ Window {
                 }
             }
         }
+
+        function onShowTerminalHint(msg) {
+            terminalPrompt.text = msg
+            terminalPrompt.color = "#FF007F" // 變成超醒目的電競粉紅字！
+            hintResetTimer.start()           // 啟動 5 秒倒數計時
+        }
     }
 
     Component.onCompleted: backend.initView()
@@ -1184,6 +1190,15 @@ Window {
                     }
                 }
             }
+        }
+    }
+    // ── 💡 5秒後把終端機提示字恢復原狀的獨立定時器 ──
+    Timer {
+        id: hintResetTimer
+        interval: 5000 // 5000 毫秒 = 5 秒
+        onTriggered: {
+            terminalPrompt.text = "Enter schedule (e.g., 明天 14-16 #Study, 2026/4/4 15:00-17:00 #LinearAlgebra -p hard -t study) or control via /find, /rm"
+            terminalPrompt.color = "#8d8d8d" // 變回經典的極客灰色
         }
     }
 }

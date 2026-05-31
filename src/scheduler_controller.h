@@ -28,6 +28,7 @@ signals:
     void viewChanged(QStringList dayLabels, QStringList dateLabels, QVariantList isCurrentMonth, QVariantList isToday, QString rangeLabel);
     void tagAdded(const QString& name, const QString& colorCode);
     void tagRemoved(const QString& name);
+    void showTerminalHint(const QString& msg);
 
 private:
     IntervalTree tree;
@@ -195,19 +196,91 @@ public:
         // ── 流派一：系統控制指令 (以 / 開頭)
         // ─────────────────────────────────────────────────────────────────────
         if (cmdStr.startsWith("/")) {
-            // 💡 1. 匹配 "/find" (清空搜尋條件，回復全部顯示)
-            std::regex findClearPattern(R"(^/find\s*$)");
-            if (std::regex_search(sRaw, rmMatch, findClearPattern)) {
-                m_searchQuery = "";
-                refreshView();
-                return;
-            }
-
-            // 💡 2. 匹配 "/find 關鍵字" (過濾顯示標題或標籤包含此字串的行程)
+            // ─── 💡 智慧時間夾縫搜尋指令───
             std::regex findPattern(R"(^/find\s+(.+))");
             if (std::regex_search(sRaw, rmMatch, findPattern)) {
-                m_searchQuery = QString::fromStdString(rmMatch[1].str()).trimmed();
-                refreshView();
+                std::string param = rmMatch[1].str();
+                
+                // 清理空白並轉小寫
+                param.erase(0, param.find_first_not_of(" \t\r\n"));
+                param.erase(param.find_last_not_of(" \t\r\n") + 1);
+                std::transform(param.begin(), param.end(), param.begin(), ::tolower);
+
+                int durationMinutes = 60; // 預設防禦時間
+                try {
+                    if (!param.empty() && param.back() == 'h') {
+                        param.pop_back();
+                        durationMinutes = static_cast<int>(std::stod(param) * 60);
+                    } else if (!param.empty() && param.back() == 'm') {
+                        param.pop_back();
+                        durationMinutes = std::stoi(param);
+                    } else if (!param.empty()) {
+                        durationMinutes = std::stoi(param);
+                    }
+                } catch (...) { durationMinutes = 60; }
+
+                QStringList gapStrings;
+                int count = 0;
+
+                // 💡 核心修正：往後掃描 7 天，一天一天獨立切片尋找
+                for (int dayOffset = 0; dayOffset < 7; ++dayOffset) {
+                    long long dayStart = dayOffset * 1440;
+                    long long dayEnd = dayStart + 1440;
+
+                    // 1. 只查詢「這一天之內」的所有行程
+                    std::vector<Event> dayEvents = tree.query(dayStart, dayEnd); 
+                    std::sort(dayEvents.begin(), dayEvents.end(), [](const Event& a, const Event& b) {
+                        return a.start < b.start;
+                    });
+
+                    // 2. 在這一天之內進行嚴格的連續夾縫掃描
+                    long long lastEnd = dayStart;
+
+                    for (const auto& ev : dayEvents) {
+                        // 防禦線：確保行程確實落在今天之內
+                        long long currentStart = std::max(ev.start, dayStart);
+
+                        if (currentStart > lastEnd) {
+                            long long gapLength = currentStart - lastEnd;
+                            if (gapLength >= durationMinutes) {
+                                // 🌟 100% 保證在同一天之內，時間絕對連續遞增
+                                int startHour = (lastEnd % 1440) / 60;
+                                int startMin = (lastEnd % 1440) % 60;
+                                int endHour = (currentStart % 1440) / 60;
+                                int endMin = (currentStart % 1440) % 60;
+
+                                char buf[64];
+                                snprintf(buf, sizeof(buf), "(D+%d) %02d:%02d-%02d:%02d", dayOffset, startHour, startMin, endHour, endMin);
+                                gapStrings.append(QString(buf));
+                                
+                                count++;
+                                if (count >= 3) break;
+                            }
+                        }
+                        if (ev.end > lastEnd) lastEnd = ev.end;
+                    }
+
+                    if (count >= 3) break;
+
+                    // 3. 檢查今天最後一個行程結束到午夜 24:00 之間有沒有大空檔
+                    if (dayEnd > lastEnd && (dayEnd - lastEnd) >= durationMinutes) {
+                        int startHour = (lastEnd % 1440) / 60;
+                        int startMin = (lastEnd % 1440) % 60;
+                        
+                        char buf[64];
+                        snprintf(buf, sizeof(buf), "(D+%d) %02d:%02d-24:00", dayOffset, startHour, startMin);
+                        gapStrings.append(QString(buf));
+                        count++;
+                    }
+
+                    if (count >= 3) break;
+                }
+
+                if (count == 0) {
+                    emit showTerminalHint("❌ 未找到滿足該長度的空白空檔。");
+                } else {
+                    emit showTerminalHint("💡 推薦空檔: " + gapStrings.join(" | "));
+                }
                 return;
             }
 
