@@ -17,13 +17,13 @@ std::vector<Event> bruteForceCheckOverlap(const std::vector<Event>& allEvents, l
 
 void runBenchmark(int dataSize) {
     std::cout << "--------------------------------------------------\n";
-    std::cout << "開始進行測試 ➔ 樣本規模: " << dataSize << " 筆行程\n";
+    std::cout << "Launching Benchmark ➔ Dataset Size: " << dataSize << " events\n";
     std::cout << "--------------------------------------------------\n";
 
     std::random_device rd;
     std::mt19937 gen(rd());
     
-    // 💡 修正二：將時間軸放大到一整年（365天 * 1440分鐘 = 525600分鐘），模擬真實稀疏行事曆
+    // Scale timeline to 1 full year (365 days * 1440 minutes = 525,600 minutes)
     long long totalMinutesInYear = 365 * 1440;
     std::uniform_int_distribution<long long> distTime(0, totalMinutesInYear - 120);
     std::uniform_int_distribution<long long> distDuration(30, 120);
@@ -31,7 +31,7 @@ void runBenchmark(int dataSize) {
     IntervalTree tree;             
     std::vector<Event> bruteForceVector; 
 
-    // 1. 測試：大規模插入效能
+    // 1. Benchmark: Large-scale Insertion Performance
     auto startInsert = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < dataSize; ++i) {
         long long startTime = distTime(gen);
@@ -43,43 +43,43 @@ void runBenchmark(int dataSize) {
     }
     auto endInsert = std::chrono::high_resolution_clock::now();
     auto durationInsert = std::chrono::duration_cast<std::chrono::microseconds>(endInsert - startInsert).count();
-    std::cout << "➔ [區間樹] 總插入耗時: " << durationInsert << " 微秒 (平均每筆: " 
-              << (double)durationInsert / dataSize << " 微秒)\n";
+    std::cout << "➔ [Interval Tree] Total Insertion: " << durationInsert << " us (Avg per entry: " 
+              << (double)durationInsert / dataSize << " us)\n";
 
-    // 2. 測試：隨機某一天的某時段查詢（黃金對決）
-    long long testStart = 200 * 1440 + 840; // 第 200 天的 14:00
-    long long testEnd = 200 * 1440 + 960;   // 第 200 天的 16:00
+    // 2. Benchmark: Random Single Window Query (Head-to-Head)
+    long long testStart = 200 * 1440 + 840; // Day 200, 14:00
+    long long testEnd = 200 * 1440 + 960;   // Day 200, 16:00
 
-    // --- (A) 區間樹查詢 ---
+    // --- (A) Interval Tree Query ---
     auto startTreeQuery = std::chrono::high_resolution_clock::now();
     auto treeResults = tree.query(testStart, testEnd);
     auto endTreeQuery = std::chrono::high_resolution_clock::now();
     auto durationTreeQuery = std::chrono::duration_cast<std::chrono::nanoseconds>(endTreeQuery - startTreeQuery).count();
 
-    // --- (B) 傳統法暴力遍歷 ---
+    // --- (B) Brute Force Linear Scan ---
     auto startBruteQuery = std::chrono::high_resolution_clock::now();
     auto bruteResults = bruteForceCheckOverlap(bruteForceVector, testStart, testEnd);
     auto endBruteQuery = std::chrono::high_resolution_clock::now();
     auto durationBruteQuery = std::chrono::duration_cast<std::chrono::nanoseconds>(endBruteQuery - startBruteQuery).count();
 
-    std::cout << "➔ [區間樹] 單次查詢耗時: " << durationTreeQuery << " 奈秒 (找到 " << treeResults.size() << " 筆)\n";
-    std::cout << "➔ [傳統法] 暴力查詢耗時: " << durationBruteQuery << " 奈秒 (找到 " << bruteResults.size() << " 筆)\n";
+    std::cout << "➔ [Interval Tree] Single Query: " << durationTreeQuery << " ns (Found " << treeResults.size() << " entries)\n";
+    std::cout << "➔ [Brute Force]   Linear Query: " << durationBruteQuery << " ns (Found " << bruteResults.size() << " entries)\n";
     
     if (durationTreeQuery > 0) {
-        std::cout << "演算法效能差距: 區間樹比傳統暴力法快了 " 
-                  << (double)durationBruteQuery / durationTreeQuery << " 倍！\n\n";
+        std::cout << "Performance Margin: Interval Tree is " 
+                  << (double)durationBruteQuery / durationTreeQuery << " times faster than Brute Force!\n\n";
     }
 }
 
 int main() {
     std::cout << "==================================================\n";
-    std::cout << "ChronoSlit 區間樹演算法效能測試啟動\n";
+    std::cout << "ChronoSlit Interval Tree Performance Benchmark\n";
     std::cout << "==================================================\n\n";
 
     runBenchmark(100);       
     runBenchmark(1000);      
     runBenchmark(10000);     
-    runBenchmark(100000);    // 十萬筆壓力測試
+    runBenchmark(100000);    // 100k Stress Test
 
     std::cout << "==================================================\n";
     return 0;
