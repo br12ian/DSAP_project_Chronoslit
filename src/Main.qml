@@ -40,44 +40,6 @@ Window {
         return Qt.rgba(c.r, c.g, c.b, alpha)
     }
 
-    // ── 2. 快捷鍵 (強健 macOS 物理 Control 映射版) ─────────────────────────
-    Shortcut { 
-        sequence: "Ctrl+Tab"
-        context: Qt.ApplicationShortcut
-        onActivated: { 
-            root.isMonthView = !root.isMonthView
-            backend.toggleViewMode(root.isMonthView) 
-        } 
-    }
-    Shortcut { 
-        sequence: "Ctrl+T"
-        context: Qt.ApplicationShortcut
-        onActivated: { 
-            tagManagerPopup.x = sidebar.width + 10
-            tagManagerPopup.y = 120
-            tagManagerPopup.open() 
-        } 
-    }
-    Shortcut { 
-        sequence: "Ctrl+Shift+C"
-        context: Qt.ApplicationShortcut
-        onActivated: { 
-            arcColorPicker.x = sidebar.width + 10
-            arcColorPicker.y = 180
-            arcColorPicker.open() 
-        } 
-    }
-    Shortcut { 
-        sequence: "Ctrl+Left"
-        context: Qt.ApplicationShortcut
-        onActivated: backend.prevRange() 
-    }
-    Shortcut { 
-        sequence: "Ctrl+Right"
-        context: Qt.ApplicationShortcut
-        onActivated: backend.nextRange() 
-    }
-
     // ── 3. 事件與標籤資料庫 ──────────────────────────────────────────────
     ListModel { id: eventModel }
     ListModel { id: headerModel } 
@@ -357,9 +319,9 @@ Window {
                         color: "#222"
                     }
                     Item { Layout.fillWidth: true } 
-                    Button { text: "〈"; implicitWidth: 40; onClicked: backend.prevRange() }
-                    Button { text: "今天"; implicitWidth: 60; onClicked: backend.goToToday() } // 串接歸位今天功能
-                    Button { text: "〉"; implicitWidth: 40; onClicked: backend.nextRange() }
+                    Button { text: "<-"; implicitWidth: 40; onClicked: backend.prevRange() }
+                    Button { text: "_Today_"; implicitWidth: 100; onClicked: backend.goToToday() } // 串接歸位今天功能
+                    Button { text: "->"; implicitWidth: 40; onClicked: backend.nextRange() }
                 }
             }
 
@@ -768,7 +730,7 @@ Window {
                         
                         background: Rectangle { color: '#000000' }
 
-                        // 保持果凍跳轉與自動滾動所需的狀態邏輯
+                        // 保持你原本寫好的送出指令邏輯
                         onAccepted: {
                             if (text !== "") {
                                 root.jumpToY = -1
@@ -776,6 +738,55 @@ Window {
                                 root.triggerNewPops = false
                                 backend.parseCommand(text)
                                 text = ""
+                            }
+                        }
+
+                        // ── 💡 核心黑科技：直接在輸入框內攔截「按住」與「放開」 ──
+                        Keys.onPressed: (event) => {
+                            if (event.isAutoRepeat) return; // 🛑 關鍵：過濾作業系統的連續按鍵干擾，只抓第一次按下
+
+                            // 同時支援 Mac 的 Command 鍵 (Meta) 與一般的 Control 鍵
+                            var isCtrlOrCmd = (event.modifiers & Qt.ControlModifier) || (event.modifiers & Qt.MetaModifier);
+                            
+                            if (isCtrlOrCmd) {
+                                // 1. 按住 T 鍵 ➔ 彈出標籤視窗
+                                if (event.key === Qt.Key_T) {
+                                    tagManagerPopup.focus = false // 🛑 強制不讓彈出視窗搶走焦點，手指放開才能被偵測到
+                                    tagManagerPopup.x = sidebar.width + 10
+                                    tagManagerPopup.y = 120
+                                    tagManagerPopup.open() 
+                                    event.accepted = true // 攔截事件，防止字母 't' 被打進輸入框
+                                }
+                                // 2. 按住 P 鍵 ➔ 彈出顏色視窗
+                                else if (event.key === Qt.Key_P) {
+                                    arcColorPicker.focus = false  // 🛑 強制不讓彈出視窗搶走焦點
+                                    arcColorPicker.x = sidebar.width + 10
+                                    arcColorPicker.y = 180
+                                    arcColorPicker.open()
+                                    event.accepted = true
+                                }
+                                // 3. 按左右方向鍵 ➔ 直接切換週曆時間
+                                else if (event.key === Qt.Key_Left) {
+                                    backend.prevRange()
+                                    event.accepted = true
+                                }
+                                else if (event.key === Qt.Key_Right) {
+                                    backend.nextRange()
+                                    event.accepted = true
+                                }
+                            }
+                        }
+
+                        Keys.onReleased: (event) => {
+                            if (event.isAutoRepeat) return; // 🛑 關鍵：過濾放開時的連擊干擾
+
+                            // 手指一離開 T 鍵、Control 鍵或 Mac 的 Command 鍵，立刻關閉標籤
+                            if (event.key === Qt.Key_T || event.key === Qt.Key_Control || event.key === Qt.Key_Meta) {
+                                tagManagerPopup.close()
+                            }
+                            // 手指一離開 P 鍵、Control 鍵或 Mac 的 Command 鍵，立刻關閉顏色
+                            if (event.key === Qt.Key_P || event.key === Qt.Key_Control || event.key === Qt.Key_Meta) {
+                                arcColorPicker.close()
                             }
                         }
                     }

@@ -32,3 +32,16 @@ target_link_libraries(chronoslit PRIVATE
     Qt6::Qml
     Qt6::Quick
 )
+
+# ─── 💡 5. 新增效能測試獨立執行檔管線 (作法 B) ───
+
+# 告訴 CMake 建立一個叫作 chronoslit_benchmark 的全新二進位檔
+add_executable(chronoslit_benchmark
+    main_benchmark.cpp
+    interval_tree.cpp  # 💡 記得把你的區間樹實作也拉進來一起編譯
+)
+
+# 因為 Event 或標籤可能有用到了 QString，我們只需要連結最基礎的 Qt6 核心庫即可
+target_link_libraries(chronoslit_benchmark PRIVATE
+    Qt6::Core
+)
