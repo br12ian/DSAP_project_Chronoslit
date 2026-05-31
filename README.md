@@ -77,9 +77,64 @@ Focus on three basic things:
 
 ## Final Report
 
-### 專案說明
+### Project description
 <!-- 完整描述你的專案做了什麼 -->
+Traditional calendar apps rely heavily on mouse interactions, which are inefficient for high-frequency scheduling. ChronoSlit is a keyboard-centric macOS utility that replaces standard graphical CRUD operations with a command-driven workflow and a lightweight HUD interface. By managing time slots inside an algorithmic Interval Tree, it eliminates interaction friction and serves as a high-speed scheduler kernel for power users.
 
-### 使用方式
+### Core features
+- Command-Driven Entry: A specialized input to define schedule properties.
+- Occupancy Policies: ``soft`` and ``hard`` policies for different event scenarios.
+- Smart Day-by-Day Gap Discovery: Swaps flat timeline sweeping for a discrete day-by-day scanning algorithm.
+- Tag-Based Indexing: Users can define different tags by themselves.
+
+### How to use?
 <!-- 如何編譯、執行、使用你的程式 -->
+**Prerequisites**:
+- **CMake** 3.16+
+- **Qt 6.0+** (Modules: Core, Gui, Qml, Quick)
+- A compiler supporting **C++20** (Clang / GCC)
 
+### Build & Run from Source
+Clone the repository and run the standard compilation pipeline:
+
+```
+# 1. Clone the repository and enter the source directory
+git clone [https://github.com/br12ian/DSAP_project_Chronoslit.git](https://github.com/br12ian/DSAP_project_Chronoslit.git)
+cd DSAP_project_Chronoslit/src
+
+# 2. Generate build cache and compile
+mkdir build && cd build
+cmake ..
+make
+
+# 3. Ignite the kernel
+./chronoslit
+```
+(Note: On macOS, the pipeline automatically generates a standalone standalone desktop package chronoslit.app with a hardware-linked custom app icon inside the build folder).
+
+After opening the interface, you can do many things by entering commands:
+
+#### 1. Add Event
+* **Syntax:** `[Date] [Time] #[Title] -p [Policy] -t [Tag]`
+* **Full Form:** `2026/04/04 15:00-17:00 #LinearAlgebra -p hard -t study`
+* **Shorthand:** `明天 15-17 #LinearAlgebra -p hard`
+* **Options:** `-p` can be `hard`, `soft`. Dates accept `today`, `tmr`, `明天` in order to make entering those commands less friction.
+
+#### 2. Find Gaps
+* **Syntax:** `/find [Duration]`
+* **Examples:**
+  * `/find 2h` (2 hours)
+  * `/find 45m` (45 minutes)
+  * `/find 90` (90 minutes)
+
+#### 3. Remove Event
+* **Syntax:** `/rm [ID]`
+* **Example:** `/rm 12`(Delete the event with ID 12)
+
+
+### Algorithm analysis
+The module `chronoslit_benchmark` runs automated stress tests over thousands of randomized entries.
+
+![Interval Tree Performance vs Brute Force](images/benchmark_result.png)
+
+The benchmark visualization above confirms that while linear arrays spike in latency as nodes scale, the Interval Tree maintains flat, sub-millisecond execution loop times.
