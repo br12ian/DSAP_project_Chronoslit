@@ -110,7 +110,6 @@ make
 # 3. Ignite the kernel
 ./chronoslit
 ```
-(Note: On macOS, the pipeline automatically generates a standalone standalone desktop package chronoslit.app with a hardware-linked custom app icon inside the build folder).
 
 After opening the interface, you can do many things by entering commands:
 
