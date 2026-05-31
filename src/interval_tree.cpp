@@ -1,96 +1,95 @@
 #include "interval_tree.h"
-#include <iostream>
 #include <algorithm>
+#include <iostream>
+
+IntervalTree::IntervalTree() : root_(nullptr) {}
 
 IntervalTree::~IntervalTree() {
-    destroy_(root_);
+    clear();
 }
 
-void IntervalTree::destroy_(ITNode* node) {
+void IntervalTree::clear() {
+    clearHelper_(root_);
+    root_ = nullptr;
+}
+
+void IntervalTree::clearHelper_(ITNode* node) {
     if (!node) return;
-    destroy_(node->left);
-    destroy_(node->right);
+    clearHelper_(node->left);
+    clearHelper_(node->right);
     delete node;
 }
 
-void IntervalTree::updateMax_(ITNode* node) {
-    if (!node) return;
-    node->max_end = node->event.end;
-    if (node->left)  node->max_end = std::max(node->max_end, node->left->max_end);
-    if (node->right) node->max_end = std::max(node->max_end, node->right->max_end);
+long long IntervalTree::getMaxEnd_(ITNode* node) {
+    if (!node) return 0;
+    return node->max_end;
 }
 
 bool IntervalTree::insert(const Event& e) {
-    bool success = true;
-    root_ = insert_(root_, e, success);
+    // 檢查是否有 Hard 衝突
+    if (e.policy == Policy::Hard) {
+        std::vector<Event> conflicts = query(e.start, e.end);
+        for (const auto& conflict : conflicts) {
+            if (conflict.policy == Policy::Hard) {
+                return false; // 衝堂，拒絕插入
+            }
+        }
+    }
+    
+    bool success = false;
+    root_ = insertHelper_(root_, e, success);
     return success;
 }
 
-ITNode* IntervalTree::insert_(ITNode* node, const Event& e, bool& success) {
+ITNode* IntervalTree::insertHelper_(ITNode* node, const Event& e, bool& success) {
     if (!node) {
-        success = true; // 成功找到空位插入
+        success = true;
         return new ITNode(e);
     }
 
-    // --- 關鍵：衝突檢查 ---
-    // 💡 判斷重疊的邏輯：新事件的起點早於舊事件的終點，且舊事件的起點早於新事件的終點
-    bool isOverlap = (e.start < node->event.end) && (node->event.start < e.end);
-
-    // 如果新事件是 Hard，且目前節點重疊，且該節點也是 Hard，就拒絕插入
-    if (e.policy == Policy::Hard && isOverlap && node->event.policy == Policy::Hard) {
-        success = false;
-        return node;
-    }
-
-    // 標準 BST 插入邏輯
     if (e.start < node->event.start) {
-        node->left = insert_(node->left, e, success);
+        node->left = insertHelper_(node->left, e, success);
     } else {
-        node->right = insert_(node->right, e, success);
+        node->right = insertHelper_(node->right, e, success);
     }
 
-    // 只有成功插入才更新 max_end
-    if (success) {
-        updateMax_(node);
-    }
-    
+    // 更新 max_end
+    node->max_end = std::max({node->event.end, getMaxEnd_(node->left), getMaxEnd_(node->right)});
     return node;
+}
+
+QJsonArray IntervalTree::exportToJsonArray() const {
+    QJsonArray array;
+    exportHelper_(root_, array);
+    return array;
+}
+
+void IntervalTree::exportHelper_(ITNode* node, QJsonArray& array) const {
+    if (!node) return;
+    exportHelper_(node->left, array);
+    array.append(node->event.toJson());
+    exportHelper_(node->right, array);
 }
 
 std::vector<Event> IntervalTree::query(long long start, long long end) const {
     std::vector<Event> result;
-    query_(root_, start, end, result);
+    queryHelper_(root_, start, end, result);
     return result;
 }
 
-void IntervalTree::query_(ITNode* node, long long qs, long long qe, std::vector<Event>& result) const {
+void IntervalTree::queryHelper_(ITNode* node, long long start, long long end, std::vector<Event>& result) const {
     if (!node) return;
-    
-    // 檢查當前節點是否重疊
-    if (!(node->event.end <= qs || node->event.start >= qe)) {
+
+    // 判斷重疊條件
+    if (node->event.start < end && node->event.end > start) {
         result.push_back(node->event);
     }
-    
-    // 左子樹可能有重疊
-    if (node->left && node->left->max_end > qs) {
-        query_(node->left, qs, qe, result);
-    }
-    
-    // 右子樹可能有重疊
-    if (node->event.start < qe) {
-        query_(node->right, qs, qe, result);
-    }
-}
 
-void IntervalTree::print() const {
-    print_(root_, 0);
-}
+    if (node->left && node->left->max_end > start) {
+        queryHelper_(node->left, start, end, result);
+    }
 
-void IntervalTree::print_(ITNode* node, int depth) const {
-    if (!node) return;
-    print_(node->right, depth + 1);
-    for (int i = 0; i < depth; i++) std::cout << "    ";
-    std::cout << "[" << node->event.start << "," << node->event.end << "] " 
-              << node->event.title << " (max=" << node->max_end << ")\n";
-    print_(node->left, depth + 1);
+    if (node->right && node->event.start < end) {
+        queryHelper_(node->right, start, end, result);
+    }
 }
