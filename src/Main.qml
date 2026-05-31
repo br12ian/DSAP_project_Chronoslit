@@ -19,7 +19,7 @@ Window {
     property string monoFont: "Menlo, Monaco, monospace"
 
     property bool isMonthView: false
-    property string currentRangeLabel: "2026年 5月"
+    property string currentRangeLabel: ""
     property int colorUpdateTrigger: 0
 
     property bool expectJump: false
