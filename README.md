@@ -135,6 +135,6 @@ After opening the interface, you can do many things by entering commands:
 ### Algorithm analysis
 The module `chronoslit_benchmark` runs automated stress tests over thousands of randomized entries.
 
-![Interval Tree Performance vs Brute Force](images/benchmark_result.png)
+![Interval Tree Performance vs Brute Force](images/algo_analysis.png)
 
 The benchmark visualization above confirms that while linear arrays spike in latency as nodes scale, the Interval Tree maintains flat, sub-millisecond execution loop times.
