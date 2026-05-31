@@ -4,7 +4,7 @@
 
 ### Motivations and Objectives
 <!-- 說明為什麼想做這個專題 -->
-Traditional calendar apps rely heavily on mouse interactions, which are inefficient for high-frequency scheduling. Chronoslit is a keyboard-centric macOS utility that utilizes a command-driven workflow and a lightweight HUD interface, it aims to eliminate interaction friction and provide a high-speed "scheduler kernel" for power users.
+Traditional calendar apps rely heavily on mouse interactions, which are inefficient for high-frequency scheduling. Chronoslit is a keyboard-centric utility that utilizes a command-driven workflow and a lightweight HUD interface, it aims to eliminate interaction friction and provide a high-speed "scheduler kernel" for power users.
 
 ### Expected features
 <!-- 列出預計實作的功能 -->
@@ -79,7 +79,7 @@ Focus on three basic things:
 
 ### Project description
 <!-- 完整描述你的專案做了什麼 -->
-Traditional calendar apps rely heavily on mouse interactions, which are inefficient for high-frequency scheduling. ChronoSlit is a keyboard-centric macOS utility that replaces standard graphical CRUD operations with a command-driven workflow and a lightweight HUD interface. By managing time slots inside an algorithmic Interval Tree, it eliminates interaction friction and serves as a high-speed scheduler kernel for power users.
+Traditional calendar apps rely heavily on mouse interactions, which are inefficient for high-frequency scheduling. ChronoSlit is a keyboard-centric utility that replaces standard graphical CRUD operations with a command-driven workflow and a lightweight HUD interface. By managing time slots inside an algorithmic Interval Tree, it eliminates interaction friction and serves as a high-speed scheduler kernel for power users.
 
 ### Core features
 - Command-Driven Entry: A specialized input to define schedule properties.
@@ -130,6 +130,7 @@ After opening the interface, you can do many things by entering commands:
 * **Syntax:** `/rm [ID]`
 * **Example:** `/rm 12`(Delete the event with ID 12)
 
+Moreover, hold ``Control + T`` to see tags, press ``Control + <-`` and ``Control + ->`` for switching weeks or months.
 
 ### Algorithm analysis
 
